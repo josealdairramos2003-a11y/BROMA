@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargando sistema...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            cursor: pointer; /* El cursor indica que se puede clicar */
+        }
+
+        /* FASE 1: La trampa (Pantalla de carga falsa) */
+        #cargando {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: white;
+            flex-direction: column;
+        }
+
+        .loader {
+            border: 5px solid #333;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* FASE 2: El Susto */
+        #susto {
+            display: none; /* Oculto al inicio */
+            height: 100%;
+            width: 100%;
+            background: black;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        /* Animación epiléptica (Cuidado) */
+        .flash-terror {
+            animation: flash 0.1s infinite;
+        }
+
+        @keyframes flash {
+            0% { background-color: red; }
+            25% { background-color: black; }
+            50% { background-color: white; }
+            75% { background-color: black; }
+            100% { background-color: red; }
+        }
+
+        #imagen-miedo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* La imagen cubre toda la pantalla */
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+        }
+
+        #texto-hack {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #0f0;
+            font-size: 5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            z-index: 2000;
+            mix-blend-mode: hard-light;
+        }
+    </style>
+</head>
+<body onclick="lanzarSusto()">
+
+    <div id="cargando">
+        <div class="loader"></div>
+        <p>TE TENGO UNA SORPRESA ESPECIAL</p>
+        <p style="font-size: 10px; color: gray;">(Toca la pantalla si no carga)</p>
+    </div>
+
+    <div id="susto">
+        <h1 id="texto-hack">TE VEO...</h1>
+        <img id="imagen-miedo" src="susto.jpg" alt="SCREAM">
+    </div>
+
+    <script>
+        function lanzarSusto() {
+            // 1. Pantalla completa
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+
+            // 2. Cambiar visuales
+            document.getElementById('cargando').style.display = 'none';
+            document.getElementById('susto').style.display = 'block';
+            document.body.classList.add('flash-terror');
+
+            // 3. GENERADOR DE SONIDO (Web Audio API)
+            // Esto crea un sonido horrible sin necesidad de descargar mp3
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+
+            // Oscilador 1: Sirena grave
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'sawtooth';
+            osc1.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc1.frequency.linearRampToValueAtTime(1000, audioCtx.currentTime + 0.1); // Subida rápida
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start();
+
+            // Oscilador 2: Ruido agudo disonante
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'square';
+            osc2.frequency.setValueAtTime(500, audioCtx.currentTime);
+            // Modulamos la frecuencia para que sea un caos
+            setInterval(() => {
+                osc2.frequency.value = Math.random() * 2000 + 500;
+                document.getElementById('texto-hack').style.display = 
+                    (Math.random() > 0.5) ? 'block' : 'none'; // Texto parpadea
+            }, 50);
+            
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start();
+
+            // Mensajes aleatorios de "Hackeo"
+            const mensajes = ["TE TENGO", "NO ESCAPES", "ERROR 666", "VIRUS DETECTADO", "ESTÁS MUERTO"];
+            setInterval(() => {
+                const texto = document.getElementById('texto-hack');
+                texto.innerText = mensajes[Math.floor(Math.random() * mensajes.length)];
+                texto.style.color = Math.random() > 0.5 ? 'red' : '#0f0';
+            }, 800);
+        }
+    </script>
+</body>
+</html>
